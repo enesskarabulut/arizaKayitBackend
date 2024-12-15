@@ -7,14 +7,12 @@ const app = express();
 
 // CORS Middleware'i ekle
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://ariza-kayit-frontend.vercel.app'
-  ],
+  origin: ['http://localhost:3000', 'https://ariza-kayit-frontend.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
 
 app.use(express.json()); // JSON verileri parse eder
 

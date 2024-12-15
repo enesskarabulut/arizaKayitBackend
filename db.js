@@ -6,15 +6,17 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 
 // CORS Middleware'i ekle
-app.use(cors()); // Tüm origin'lere izin verir
-app.use(express.json()); // JSON verileri parse eder
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://ariza-kayit-frontend.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-// Opsiyonel: CORS'u belirli bir origin için sınırlamak isterseniz
-// app.use(cors({
-//   origin: 'http://localhost:3000', // Belirli frontend URL'sine izin ver
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   credentials: true,
-// }));
+app.use(express.json()); // JSON verileri parse eder
 
 // Supabase bağlantı bilgilerini yükle
 const supabaseUrl = process.env.SUPABASE_URL;

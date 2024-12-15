@@ -1,4 +1,5 @@
-const { supabase } = require('../../supabase');
+// api/auth/login.js
+const { supabase } = require('../../../supabase');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 

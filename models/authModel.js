@@ -1,6 +1,16 @@
-const users = [
-    { username: 'admin', password_hash: '$2b$10$hashlanmisSifre' },
-  ];
+const supabase = require('../supabase'); // Supabase bağlantısını dahil et
+
+async function getUserByUsername(username) {
+  const { data, error } = await supabase
+    .from('users') // 'users' tablosundan veri çek
+    .select('*')
+    .eq('username', username)
+    .single();
   
-  exports.getUserByUsername = async (username) => users.find((user) => user.username === username);
-  
+  if (error) return null;
+  return data;
+}
+
+module.exports = {
+  getUserByUsername
+};

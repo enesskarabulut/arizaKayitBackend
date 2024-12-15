@@ -1,43 +1,40 @@
-const { getArizalar, getAriza, createNewAriza, updateAriza, deleteAriza } = require('../models/arizaModel');
-const { uploadToSupabase } = require('./upload');
-const authMiddleware = require('./auth');
+const { supabase } = require('../db'); // Supabase bağlantısını dahil et
 
 module.exports = async (req, res) => {
   const method = req.method;
-  const id = req.query.id; // Arıza ID'si query'den alınır.
 
-  // Yetkilendirme middleware
-  await authMiddleware(req, res);
-
+  // GET: Tüm arıza kayıtlarını getir
   if (method === 'GET') {
-    // Tüm arızaları getir
-    if (!id) return res.json(await getArizalar());
-    // Tek bir arıza getir
-    const ariza = await getAriza(id);
-    return ariza ? res.json(ariza) : res.status(404).json({ message: 'Arıza bulunamadı' });
+    const { data, error } = await supabase
+      .from('arizalar') // 'arizalar' tablosundan veri çek
+      .select('*');
+
+    if (error) {
+      console.error("Supabase Hatası:", error.message);
+      return res.status(500).json({ message: 'Arızalar yüklenemedi', error: error.message });
+    }
+
+    return res.json(data);
   }
 
+  // POST: Yeni arıza kaydı ekle
   if (method === 'POST') {
-    const { adres, usta, status, tarih, detay } = req.body;
+    const { adres, usta, status, tarih, ücret, detay } = req.body;
 
-    if (!adres || !usta) return res.status(400).json({ message: 'Adres ve usta bilgisi zorunludur' });
-    if (status === 'ileri tarihli' && !tarih)
-      return res.status(400).json({ message: 'İleri tarihli arıza için tarih alanı zorunludur' });
+    if (!adres || !usta) {
+      return res.status(400).json({ message: 'Adres ve usta bilgisi zorunludur' });
+    }
 
-    const yeniAriza = await createNewAriza(req.body);
-    return res.status(201).json(yeniAriza);
-  }
+    const { data, error } = await supabase
+      .from('arizalar')
+      .insert([{ adres, usta, status, tarih, ücret, detay }]);
 
-  if (method === 'PUT') {
-    const updatedAriza = await updateAriza(id, req.body);
-    return updatedAriza
-      ? res.json(updatedAriza)
-      : res.status(404).json({ message: 'Güncellenecek arıza bulunamadı' });
-  }
+    if (error) {
+      console.error("Supabase Hatası:", error.message);
+      return res.status(500).json({ message: 'Arıza kaydı eklenemedi', error: error.message });
+    }
 
-  if (method === 'DELETE') {
-    const deleted = await deleteAriza(id);
-    return deleted ? res.json({ message: 'Arıza silindi' }) : res.status(404).json({ message: 'Silinecek arıza bulunamadı' });
+    return res.status(201).json(data);
   }
 
   return res.status(405).json({ message: 'Geçersiz istek yöntemi' });

@@ -42,3 +42,4 @@ build/
 
 # Vercel local ayar dosyaları
 vercel.json
+.vercel

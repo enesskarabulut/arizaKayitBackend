@@ -1,13 +1,47 @@
+const express = require('express');
+const cors = require('cors'); // CORS paketi
 const { createClient } = require('@supabase/supabase-js');
+
+// Express uygulamasını başlat
+const app = express();
+
+// CORS Middleware'i ekle
+app.use(cors()); // Tüm origin'lere izin verir
+app.use(express.json()); // JSON verileri parse eder
+
+// Opsiyonel: CORS'u belirli bir origin için sınırlamak isterseniz
+// app.use(cors({
+//   origin: 'http://localhost:3000', // Belirli frontend URL'sine izin ver
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true,
+// }));
 
 // Supabase bağlantı bilgilerini yükle
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // Opsiyonel: Service Role Key
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase bağlantı bilgileri eksik! .env dosyasını kontrol edin.');
+  console.error('Supabase bağlantı bilgileri eksik! .env dosyasını kontrol edin.');
+  process.exit(1); // Hata durumunda uygulamayı durdur
 }
 
+// Anon Key ile bağlantı oluştur
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-module.exports = { supabase };
+// Opsiyonel: Service Key ile ayrı bir admin bağlantısı oluştur
+let supabaseAdmin = null;
+if (supabaseServiceKey) {
+  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+  console.log('Admin bağlantısı oluşturuldu.');
+} else {
+  console.warn('Supabase Service Key tanımlı değil. Admin bağlantısı devre dışı.');
+}
+
+// Test endpoint (isteğe bağlı kontrol için)
+app.get('/', (req, res) => {
+  res.json({ message: 'CORS ve Supabase bağlantısı çalışıyor!' });
+});
+
+// Uygulama ve Supabase bağlantısını dışa aktar
+module.exports = { app, supabase, supabaseAdmin };

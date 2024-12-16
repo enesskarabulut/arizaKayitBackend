@@ -7,10 +7,10 @@ const app = express();
 
 // CORS Middleware'i ekle
 app.use(cors({
-  origin: ['*'],
+  origin: ['http://localhost:3000', 'http://localhost:1', 'https://ariza-kayit-frontend.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false
+  credentials: true
 }));
 
 
